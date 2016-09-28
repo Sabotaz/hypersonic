@@ -6,10 +6,13 @@ import random
 
 def simulate_turn(game):
     actions = [choose_action(game,player) for player in game.players]
+    my_action = None
     for action in actions:
+        if action.player.pid == config.MY_ID:
+            my_action = action
         game = game.apply_action(action)
     game = game.next_turn()
-    return game
+    return game, my_action
 
 def choose_action(game, player):
     allowed = [(player.x,player.y)]

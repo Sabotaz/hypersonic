@@ -35,6 +35,9 @@ class Action:
         self.y = y
         self.bomb = False
 
+    def __str__(self):
+        return ("BOMB " if self.bomb else "MOVE ") + str(self.x) + " " + str(self.y)
+
 class Game:
     def __init__(self):
         self.plateau = []
