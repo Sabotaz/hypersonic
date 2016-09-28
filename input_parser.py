@@ -7,6 +7,10 @@ def prepare_plateau():
     caisses = []
     players = []
     bombs = []
+    items = []
+
+    game = Game()
+
     my_player = None
     for i in range(config.hauteur):
         row = input()
@@ -16,11 +20,11 @@ def prepare_plateau():
                 r.append([])
             elif c == "0":
                 caisse = Caisse(j, i)
-                caisses.append(caisse)
+                game.caisses.append(caisse)
                 r.append([caisse])
             else:
                 r.append([])
-        plateau.append(r)           
+        game.plateau.append(r)           
     entities = int(input())
     for i in range(entities):
         entity_type, owner, x, y, param_1, param_2 = [int(j) for j in input().split()]
@@ -28,17 +32,21 @@ def prepare_plateau():
         if entity_type == 0:
             entity = Player(owner, x, y, param_1, param_2)
             if owner == MY_ID:
-                my_player = entity
-            else:
-                players.append(entity)
+                game.my_player = entity
+            game.players.append(entity)
         elif entity_type == 1:
             entity = Bomb(owner, x, y, param_1, param_2)
-            bombs.append(entity)
+            game.bombs.append(entity)
         elif entity_type == 2:
             if param_1 == 1:
                 entity = Objet(x, y, "EXTRA_PORTEE")
             elif param_1 == 2:
                 entity = Objet(x, y, "EXTRA_BOMBE")
-        plateau[y][x].append(entity)
-    return plateau, caisses, players, my_player, bombs
+            game.items.append(entity)
+        game.get_case(x, y).append(entity)
+
+    for bomb in game.bombs:
+        game.get_player(bomb.pid).nb_bombs_max += 1
+        
+    return game
 

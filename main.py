@@ -3,6 +3,8 @@ import math
 from datatypes import *
 from utils import *
 from input_parser import *
+from simulation import *
+import montecarlo
 import config
 
 config.largeur, config.hauteur, config.MY_ID = [int(i) for i in input().split()]
@@ -102,10 +104,12 @@ def compute_destructs(bombs, plateau):
 
 # game loop
 while True:
-    plateau, caisses, players, my_player, bombs = prepare_plateau()
-    compute_destructs(bombs, plateau)
-    pounds = combute_pounds(caisses, plateau)
-    
+    game = prepare_plateau()
+    compute_destructs(game.bombs, game.plateau)
+    pounds = combute_pounds(game.caisses, game.plateau)
+
+    next_action = montecarlo.MC(game)
+
     best_score = -1
     best_pos_x = -1
     best_pos_y = -1
@@ -113,19 +117,19 @@ while True:
         for x in range(config.largeur):
             has_objects = 0
             is_caisse = False
-            for item in plateau[y][x]:
+            for item in game.plateau[y][x]:
                 if type(item) == Caisse:
                     is_caisse = True
                 elif type(item) == Objet:
                     has_objects = 1
             if not is_caisse:
                 pound = pounds[y][x]
-                score = 4 * pound - abs(my_player.x - x) - abs(my_player.y - y) + has_objects * 8
+                score = 4 * pound - abs(game.my_player.x - x) - abs(game.my_player.y - y) + has_objects * 8
                 if score > best_score:
                     best_score = score
                     best_pos_x = x
                     best_pos_y = y
-    if best_pos_x == my_player.x and best_pos_y == my_player.y:
+    if best_pos_x == game.my_player.x and best_pos_y == game.my_player.y:
         print("BOMB " + str(best_pos_x) + " " + str(best_pos_y))
     else:
         print("MOVE " + str(best_pos_x) + " " + str(best_pos_y))
