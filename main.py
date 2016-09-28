@@ -3,17 +3,18 @@ import math
 import datatypes
 import utils
 import input_parser
+import config
 
-largeur, hauteur, MY_ID = [int(i) for i in input().split()]
+config.largeur, config.hauteur, config.MY_ID = [int(i) for i in input().split()]
 
 def combute_pounds(caisses, plateau):
-    pounds = [[0 for i in range(largeur)] for j in range(hauteur)]
+    pounds = [[0 for i in range(config.largeur)] for j in range(config.hauteur)]
     for caisse in caisses:
         if caisse.will_destruct:
             continue
         x,y = caisse.x, caisse.y
         for i in range(1,3):
-            if y+i < hauteur:
+            if y+i < config.hauteur:
                 case = plateau[y+i][x]
                 block = False
                 for entity in case:
@@ -33,7 +34,7 @@ def combute_pounds(caisses, plateau):
                     break
                 pounds[y-i][x] += 1
         for i in range(1,3):
-            if x+i < largeur:
+            if x+i < config.largeur:
                 case = plateau[y][x+i]
                 block = False
                 for entity in case:
@@ -58,7 +59,7 @@ def compute_destructs(bombs, plateau):
     for bomb in bombs:
         x,y = bomb.x, bomb.y
         for i in range(1,3):
-            if y+i < hauteur:
+            if y+i < config.hauteur:
                 case = plateau[y+i][x]
                 block = False
                 for entity in case:
@@ -78,7 +79,7 @@ def compute_destructs(bombs, plateau):
                 if block:
                     break
         for i in range(1,3):
-            if x+i < largeur:
+            if x+i < config.largeur:
                 case = plateau[y][x+i]
                 block = False
                 for entity in case:
@@ -101,15 +102,15 @@ def compute_destructs(bombs, plateau):
 
 # game loop
 while True:
-    plateau, caisses, players, my_player, bombs = prepare_plateau(largeur, hauteur, MY_ID)
+    plateau, caisses, players, my_player, bombs = prepare_plateau()
     compute_destructs(bombs, plateau)
     pounds = combute_pounds(caisses, plateau)
     
     best_score = -1
     best_pos_x = -1
     best_pos_y = -1
-    for y in range(hauteur):
-        for x in range(largeur):
+    for y in range(config.hauteur):
+        for x in range(config.largeur):
             has_objects = 0
             is_caisse = False
             for item in plateau[y][x]:

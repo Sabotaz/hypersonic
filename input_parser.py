@@ -1,11 +1,13 @@
 
-def prepare_plateau(largeur, hauteur, MY_ID):
+import config
+
+def prepare_plateau():
     plateau = []
     caisses = []
     players = []
     bombs = []
     my_player = None
-    for i in range(hauteur):
+    for i in range(config.hauteur):
         row = input()
         r = [] 
         for j,c in enumerate(row):
