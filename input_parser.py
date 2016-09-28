@@ -1,5 +1,6 @@
 
 import config
+from datatypes import *
 
 def prepare_plateau():
     plateau = []

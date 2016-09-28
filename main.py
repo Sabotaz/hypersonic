@@ -1,8 +1,8 @@
 import sys
 import math
-import datatypes
-import utils
-import input_parser
+from datatypes import *
+from utils import *
+from input_parser import *
 import config
 
 config.largeur, config.hauteur, config.MY_ID = [int(i) for i in input().split()]
