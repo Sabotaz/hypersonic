@@ -1,11 +1,15 @@
 import copy
 import utils
+import config
 
 class Caisse:
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.will_destruct = False
+        
+    def __deepcopy__(self, memodict={}):
+        return Caisse(self.x, self.y)
 
 class Player:
     def __init__(self, pid, x, y, nb_bombs, portee):
@@ -15,6 +19,11 @@ class Player:
         self.portee = portee
         self.x = x
         self.y = y
+        
+    def __deepcopy__(self, memodict={}):
+        player = Player(self.pid, self.x, self.y, self.nb_bombs, self.portee)
+        player.nb_bombs_max = self.nb_bombs_max
+        return player
 
 class Bomb:
     def __init__(self, pid, x, y, nb_tours, portee):
@@ -23,10 +32,18 @@ class Bomb:
         self.portee = portee
         self.x = x
         self.y = y
+        
+    def __deepcopy__(self, memodict={}):
+        return Bomb(self.pid, self.x, self.y, self.nb_tours, self.portee)
 
 class Objet:
     def __init__(self, x, y, typ):
+        self.x = x
+        self.y = y
         self.typ = typ
+        
+    def __deepcopy__(self, memodict={}):
+        return Objet(self.x, self.y, self.typ)
 
 class Action:
     def __init__(self, player, x, y):
@@ -40,18 +57,45 @@ class Action:
 
 class Game:
     def __init__(self):
-        self.plateau = []
+        self.plateau = [[[] for _ in range(config.largeur)] for _ in range(config.hauteur)]
         self.caisses = []
         self.players = []
         self.my_player = None
         self.bombs = []
         self.items = []
 
+    def __deepcopy__(self, memodict={}):
+        game = Game()
+        for y in range(config.hauteur):
+            for x in range(config.largeur):
+                case = self.get_case(x,y)
+                for item in case:
+                    item = copy.deepcopy(item)
+                    game.get_case(x,y).append(item)
+                    t = type(item)
+                    if t == Caisse:
+                        game.caisses.append(item)
+                    elif t == Player:
+                        game.players.append(item)
+                        if item.pid == config.MY_ID:
+                            game.my_player = item
+                    elif t == Bomb:
+                        game.bombs.append(item)
+                    elif t == Objet:
+                        game.items.append(item)
+        return game
+
     def get_player(self, pid):
         return next((x for x in self.players if x.pid == pid), None)
 
     def get_case(self, x, y):
         return self.plateau[y][x]
+
+    def remove(self, x, y, obj):
+        self.get_case(x,y).remove(obj)
+
+    def add(self, x, y, obj):
+        self.get_case(x,y).append(obj)
 
     def apply_action(self, action):
         micros = current_micro_time()

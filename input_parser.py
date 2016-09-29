@@ -16,15 +16,11 @@ def prepare_plateau():
         row = input()
         r = [] 
         for j,c in enumerate(row):
-            if c == ".":
-                r.append([])
-            elif c == "0":
+            if c == "0":
                 caisse = Caisse(j, i)
                 game.caisses.append(caisse)
-                r.append([caisse])
-            else:
-                r.append([])
-        game.plateau.append(r)           
+                game.get_case(j, i).append(caisse)
+
     entities = int(input())
     for i in range(entities):
         entity_type, owner, x, y, param_1, param_2 = [int(j) for j in input().split()]
