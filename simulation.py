@@ -5,13 +5,13 @@ import utils
 import random
 
 def simulate_turn(game):
+    game.next_turn()
     actions = [choose_action(game,pid) for pid in range(config.NB_JOUEURS)]
     my_action = None
     for action in actions:
         if action.pid == config.MY_ID:
             my_action = action
         game.apply_action(action)
-    game.next_turn()
     return game, my_action
 
 def choose_action(game, pid):

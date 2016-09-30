@@ -30,7 +30,8 @@ class Game:
         return game
         
     def resize_player_array(self):
-        self.players = numpy.resize(self.players, (config.NB_JOUEURS,7))
+        #self.players = numpy.resize(self.players, (config.NB_JOUEURS,7))
+        pass
 
     def get_player(self, pid):
         return self.players[pid]
@@ -66,7 +67,7 @@ class Game:
         
         player = self.get_player(action.pid)
         if action.bomb:
-            self.set_bomb(player[0], player[1], action.pid, 8+1, player[2])
+            self.set_bomb(player[0], player[1], action.pid, 8, player[2])
             player[3] -= 1
             
         player[0] = action.x
@@ -80,7 +81,7 @@ class Game:
         return game
 
     def is_accessible(self, x, y):
-        return self.is_valide(x,y) and self.murs_array[x,y] == 0 and self.caisses_array[x,y] == 0 and self.bombs_array[x,y,0] == 0
+        return self.is_valide(x,y) and self.murs_array[x,y] == 0 and self.caisses_array[x,y] == 0 and self.bombs_array[x,y,1] == 0
 
     def next_turn(self):
         self.xplod()
@@ -99,6 +100,9 @@ class Game:
                     pile.append((x,y))
                     
         def explose(owner, x, y):
+            for pid in range(config.NB_JOUEURS):
+                if self.players[pid,0] == x and self.players[pid,1] == y:
+                    self.players[pid,6] = 1
             if not self.is_valide(x, y) or self.is_mur(x, y):
                 return True
             if self.is_item(x, y):
@@ -112,16 +116,16 @@ class Game:
                     self.bombs_array[x,y,1] = 1
                     pile.append((x, y))
                 return True
-            for pid in range(config.NB_JOUEURS):
-                player = self.players[pid]
-                if player[0] == x and player[1] == y and pid != owner:
-                    player[6] = 1
             return False
                     
         while pile:
             x,y = pile.pop()
             owner = self.bombs_array[x,y,0]
             portee = self.bombs_array[x,y,2]
+            # on meurt aussi sur la bombe !
+            for pid in range(config.NB_JOUEURS):
+                if self.players[pid,0] == x and self.players[pid,1] == y:
+                    self.players[pid,6] = 1
             # lol lol
             for i in range(1,portee):
                 if explose(owner, x+i, y):
