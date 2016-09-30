@@ -5,40 +5,44 @@ import utils
 import random
 
 def simulate_turn(game):
-    actions = [choose_action(game,player) for player in game.players]
+    actions = [choose_action(game,pid) for pid in range(config.NB_JOUEURS)]
     my_action = None
     for action in actions:
-        if action.player.pid == config.MY_ID:
+        if action.pid == config.MY_ID:
             my_action = action
-        game = game.apply_action(action)
-    game = game.next_turn()
+        game.apply_action(action)
+    game.next_turn()
     return game, my_action
 
-def choose_action(game, player):
-    allowed = [(player.x,player.y)]
-    if player.x != 0:
-        if game.is_accessible(player.x-1,player.y):
-            allowed.append((player.x-1,player.y))
-    if player.y != 0:
-        if game.is_accessible(player.x,player.y-1):
-            allowed.append((player.x,player.y-1))
-    if player.x != config.largeur - 1:
-        if game.is_accessible(player.x+1,player.y):
-            allowed.append((player.x+1,player.y))
-    if player.y != config.hauteur - 1:
-        if game.is_accessible(player.x,player.y+1):
-            allowed.append((player.x,player.y+1))
+def choose_action(game, pid):
+    player = game.get_player(pid)
+    px = player[0]
+    py = player[1]
+    allowed = [(px,py)]
+    if px != 0:
+        if game.is_accessible(px-1,py):
+            allowed.append((px-1,py))
+    if py != 0:
+        if game.is_accessible(px,py-1):
+            allowed.append((px,py-1))
+    if px != config.largeur - 1:
+        if game.is_accessible(px+1,py):
+            allowed.append((px+1,py))
+    if py != config.hauteur - 1:
+        if game.is_accessible(px,py+1):
+            allowed.append((px,py+1))
 
     x,y = random.choice(allowed)
-    action = Action(player, x, y)
-    if player.nb_bombs > 0:
+    action = Action(pid, x, y)
+    if player[3] > 0: #nb_bombs_restantes
         action.bomb = random.random() > 0.5
 
     return action
     
 
 def simulate(game):
+    game = game.clone()
     game, action = simulate_turn(game)
     for i in range(config.PROFONDEUR-1):
         game,_ = simulate_turn(game)
-    return action
+    return action, game

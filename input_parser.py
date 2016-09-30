@@ -3,46 +3,37 @@ import config
 from datatypes import *
 
 def prepare_plateau():
-    plateau = []
-    caisses = []
-    players = []
-    bombs = []
-    items = []
-
     game = Game()
 
     my_player = None
     for i in range(config.hauteur):
         row = input()
-        r = [] 
         for j,c in enumerate(row):
-            if c == "0":
-                caisse = Caisse(j, i)
-                game.caisses.append(caisse)
-                game.get_case(j, i).append(caisse)
+            if c == "X":
+                game.set_mur(j, i)
+            elif c != ".":
+                game.set_caisse(j, i, int(c)+1)
 
     entities = int(input())
+    bombs = [] # for tracking nb_bombs_max
+    nb_joueurs = 0
     for i in range(entities):
-        entity_type, owner, x, y, param_1, param_2 = [int(j) for j in input().split()]
+        entity_type, pid, x, y, param_1, param_2 = [int(j) for j in input().split()]
         entity = None
         if entity_type == 0:
-            entity = Player(owner, x, y, param_1, param_2)
-            if owner == MY_ID:
-                game.my_player = entity
-            game.players.append(entity)
+            game.set_player(pid, x, y, param_1, param_2)
+            nb_joueurs += 1
         elif entity_type == 1:
-            entity = Bomb(owner, x, y, param_1, param_2)
-            game.bombs.append(entity)
+            game.set_bomb(x, y, pid, param_1, param_2)
+            bombs.append(pid)
         elif entity_type == 2:
-            if param_1 == 1:
-                entity = Objet(x, y, "EXTRA_PORTEE")
-            elif param_1 == 2:
-                entity = Objet(x, y, "EXTRA_BOMBE")
-            game.items.append(entity)
-        game.get_case(x, y).append(entity)
+            game.set_objet(x, y, param_1)
 
-    for bomb in game.bombs:
-        game.get_player(bomb.pid).nb_bombs_max += 1
+    for pid in bombs:
+        game.get_player(pid)[4] += 1
+        
+    config.set_nb_joueurs(nb_joueurs)
+    game.resize_player_array()
         
     return game
 
